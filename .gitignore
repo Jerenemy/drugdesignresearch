@@ -1,0 +1,105 @@
+[200~# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Environment files
+env/
+venv/
+.venv/
+*.conda
+.condarc
+.mamba/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs
+logs/
+*.log
+
+# Virtual Environment files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# RDKit-specific temporary files
+rdkit/
+mol_files/
+*.pdb
+*.mol2
+*.sdf
+*.xyz
+*.pkl
+
+# WandB logs and artifacts
+wandb/
+*.wandb
+
+# Model and data checkpoints
+checkpoints/
+*.h5
+*.ckpt
+*.pt
+*.pth
+
+# Compiled C extensions
+*.o
+*.a
+*.dylib
+*.lib
+*.dll
+*.so
+
+# PyCharm IDE files
+.idea/
+
+# VSCode IDE files
+.vscode/
+
+# AutoDock-related files
+docking/
+*.docking
+*.dlg
+
+# Images
+*.png
+*.jpg
+
+# Large data files (if applicable)
+data/
+*.csv
+*.tsv
+
+# Exclude models in specific directories
+MODELS/
+
+# Graphs in GraphDecomp
+GraphDecomp/graph_decomp
+
+# Exclude everything in SMILES folder
+SMILES/
+
+# Exclude ipynb files
+*.ipynb
+
+# Exclude some files from Rewards/SA_Score
+Rewards/SA_Score/data
+Rewards/SA_Score/fpscores.pkl.gz
+
+# Exclude saved models etc
+SavedModels
+target_eff4
+
+# Exclude pdbqt files
+*.pdbqt
+
+# exclude files in jeremy
+Files/
+
+# exclude all .txt files (especially the entire catted file)
+*.txt
+
+# exclude large tup lib
+csv_tup_lib.py
