@@ -96,7 +96,7 @@ target_eff4
 *.pdbqt
 
 # exclude files in jeremy
-Files/
+
 
 # exclude all .txt files (especially the entire catted file)
 *.txt
