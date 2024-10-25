@@ -228,10 +228,22 @@ import multiprocessing
 class DockReward(SingleReward):
     def __init__(self, receptor_path, Wandb=True):
         super(DockReward, self).__init__(Wandb)
+        
+        # for Jeremy: if calling rewards.py from different location, relative receptor_path
+        #  will be different. therefore check that path exists, if it doesn't, assume it's
+        #  being called from Jeremy/CSV/Output/Scripts instead of the usual place, and update 
+        #  relative receptor_path accordingly.
         import os
         if not os.path.exists(receptor_path):
-            receptor_path = '../' + receptor_path
-
+            print(f"RECEPTOR_PATH = {receptor_path}")
+            receptor_path = '../../../' + receptor_path
+        if os.path.exists(receptor_path):
+            print("running from Jeremy/CSV/Output/Scripts. receptor path exists")
+        else: 
+            print(f"invalid receptor_path. using hard-coded receptor path. cwd = {os.getcwd()}")
+            receptor_path = '/home/jzay/Desktop/GoodThesis1/DrugDesignThesis/CLEAN/Rewards/y220c_av.pdbqt'
+            # raise Exception
+        
         self.vinaWrapper = VinaWrapper(receptor_path)
         self.timeout_occurred = None
 
@@ -261,8 +273,12 @@ class DockReward(SingleReward):
 
     def _reward(self, mol, timeout_seconds=20):
         smile = Chem.MolToSmiles(mol)
-        print(smile, self.vinaWrapper.CalculateEnergies(smile))
-        return self.vinaWrapper.CalculateEnergies(smile)
+        energies = self.vinaWrapper.CalculateEnergies(smile)
+        print(f"smile = {smile}, energies = {energies}")
+        # print(f"receptor_path = {self.receptor_path}")
+        import os
+        # print(f"os.listdir = {os.listdir('../../../../')}")
+        return energies
         # timeout_seconds = 1
 
         # def calculate_energies(queue, smile):

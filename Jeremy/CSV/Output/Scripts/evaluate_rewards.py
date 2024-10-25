@@ -71,7 +71,7 @@ def create_csv(effectors_list, reward_module, output_file):
         with open(output_file, 'w', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(header)
-
+            print(f"# effectors = {len(effectors_list)-1}")
             for i, (key, data) in enumerate(effectors_list):
                 smiles, binding_affinity, chembl_number = data
                 row = [
@@ -81,6 +81,7 @@ def create_csv(effectors_list, reward_module, output_file):
                     binding_affinity
                 ]
                 # Append rewards
+                # print(f"len = {len(reward_names)}")
                 for reward in reward_names:
                     try:
                         reward_value = reward_data[reward][i]
@@ -95,20 +96,20 @@ def create_csv(effectors_list, reward_module, output_file):
 
 def append_to_csv(effectors_list, reward_module, output_file, start_line):
     """
-    Appends new molecular data and their rewards to an existing CSV file.
+    Updates rewards for existing molecular data in the CSV file. If a molecule does not exist, appends it.
 
     Parameters:
         effectors_list (list of tuples): Each tuple contains (Nickname, [Smiles, Binding_Affinity, Chembl#]).
         reward_module (FinalRewardModule): The reward module to calculate rewards.
         output_file (str): Path to the existing CSV file.
-        start_line (int): The line number from which to start appending.
+        start_line (int): The line number from which to start updating/appending data.
     """
     # Calculate rewards for each molecule
     for key, data in effectors_list:
         smiles = data[0]
         mol = Chem.MolFromSmiles(smiles)
         if mol:
-            # print(f"Appending molecule: {key} ({smiles})")
+            # print(f"Updating molecule: {key} ({smiles})")
             reward_module.GiveReward(mol)
         else:
             print(f"Warning: Failed to parse SMILES for {key}: {smiles}")
@@ -121,46 +122,56 @@ def append_to_csv(effectors_list, reward_module, output_file, start_line):
     try:
         with open(output_file, 'r', newline='') as csvfile:
             existing_data = list(csv.reader(csvfile))
+            header = existing_data[0]  # Preserve header
+            existing_data = existing_data[1:]  # Skip header
     except FileNotFoundError:
-        print(f"Error: The file {output_file} does not exist. Cannot append data.")
+        print(f"Error: The file {output_file} does not exist. Cannot update data.")
         return
     except Exception as e:
         print(f"Error reading the existing CSV file {output_file}: {e}")
         return
 
-    # Prepare new data to append
-    new_data = []
+    # Create a dictionary to index existing molecules by Nickname or SMILES
+    existing_dict = {}  # UPDATE: Dictionary to track existing molecules by Nickname or SMILES
+    for row in existing_data:
+        smiles = row[0]
+        nickname = row[1]
+        existing_dict[nickname] = row
+
+    # Prepare new/updated data
     for i, (key, data) in enumerate(effectors_list):
         smiles, binding_affinity, chembl_number = data
-        mol = Chem.MolFromSmiles(smiles)
-        if mol:
-            row = [
-                smiles,
-                key,
-                chembl_number,
-                binding_affinity
-            ]
-            # Append rewards
-            for reward in reward_names:
-                try:
-                    reward_value = reward_data[reward][i]
-                    row.append(reward_value)
-                except IndexError:
-                    print(f"Error: Reward index out of range for {reward} on {key}")
-                    row.append('')
-            new_data.append(row)
+        row = [
+            smiles,
+            key,
+            chembl_number,
+            binding_affinity
+        ]
+        # Append rewards
+        for reward in reward_names:
+            try:
+                reward_value = reward_data[reward][i]
+                row.append(reward_value)
+            except IndexError:
+                print(f"Error: Reward index out of range for {reward} on {key}")
+                row.append('')
 
-    # Insert new data at the specified start_line
-    # Note: CSV lines start at 0, header is usually line 0
-    updated_data = existing_data[:start_line] + new_data + existing_data[start_line:]
+        # UPDATE: Replace row if it exists, otherwise add new
+        if key in existing_dict:
+            existing_dict[key] = row  # Update existing entry
+        else:
+            existing_dict[key] = row  # Add new entry
 
-    # Write back to the CSV file
+    # Write updated data back to the CSV
     try:
         with open(output_file, 'w', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
-            for row in updated_data:
+            # Write the header
+            csvwriter.writerow(header)
+            # Write updated rows
+            for row in existing_dict.values():
                 csvwriter.writerow(row)
-        print(f"Successfully appended rewards to {output_file}")
+        print(f"Successfully updated rewards in {output_file}")
     except Exception as e:
         print(f"Error writing to CSV file {output_file}: {e}")
 
@@ -193,7 +204,7 @@ def main():
         default_input = "../Files/csv_rewards/output_rewards.csv"
         default_output = "../Files/csv_rewards/output_rewards.csv"
     else:
-        default_input = "../../Input/Files/Formatted/sorted_deduplicated_data_effectors_out.csv"
+        default_input = "../../Input/Files/Formatted/sorted_deduped_effectors_formatted.csv"
         default_output = "../Files/csv_rewards/output_rewards.csv"
 
     # Assign input and output files

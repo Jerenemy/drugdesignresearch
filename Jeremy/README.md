@@ -171,3 +171,69 @@ Idk yet, I'll find out tomorrow.
 
 ## How to Fix to make Reward Creation Much More Streamlined
 Should be able to do everything by putting a CSV file into the INPUT folder, running the command with the csv_name as the cmd-line arg, the specific task to perform (eg img creation, reward evaluation, R graph creation), and it should spit the CSV with rewards in the OUTPUT, along with the Images in the OUTPUT, and any graphs created in the OUTPUT. This shouldn't be too difficult. TOMORROW I AM GOING TO DO ALL OF THIS TO MAKE IT POSSIBLE TO ACTUALLY WORK WITHOUT WASTING MY TIME NAVINGATING ALL THIS SHIT CODE. 
+
+## Current Attempt at Streamlined Process
+Now, to generate the final graph of the rewards based on the molecules, you simply run the [generate_csv_and_plot.sh](HQ/generate_csv_and_plot.sh) in HQ, and pass the required arguments. 
+
+**[generate_csv_and_plot.sh](HQ/generate_csv_and_plot.sh)**: highest level bash script. has functionality to generate the formatted csv with the effectors, create a new csv with some/all rewards evaluated or update specific rewards in an existing csv with rewards evaluated, and create the plot of the rewards against the effectors in order of highest KD affinity to lowest.
+
+**[run_format_csv.sh](CSV/Input/Scripts/run_format_csv.sh)**: calls [format_csv.py](CSV/Input/Scripts/format_csv.py). 
+- purpose: format the [sorted_deduped_effectors.csv](CSV/Input/Files/Raw/sorted_deduped_effectors.csv) file, removing all unneccessary data, and adding columns where each reward will be stored for each effector.
+- generates a formatted csv: [sorted_deduped_effectors_formatted.csv](CSV/Input/Files/Formatted/sorted_deduped_effectors_formatted.csv)
+
+takes at most 2 optional args:
+  - usage: ./run_format_csv.sh [input.csv] [output_dir]
+    - input.csv is always in the CSV/Input/Files/Raw directory 
+  - example: 
+    - ./run_format_csv.sh
+    - ./run_format_csv.sh sorted_deduped_effectors ../Files/Formatted
+
+
+**[run_evaluate_rewards.sh](CSV/Output/Scripts/run_evaluate_rewards.sh)**: calls [evaluate_rewards.py](CSV/Output/Scripts/evaluate_rewards.py). 
+- purpose: evaluate the rewards for each effector in the formatted csv.
+  - 2 modes: --create, --append
+    - --create: creates a new csv starting from the blank template of the formatted csv, and evaluates some/all of rewards
+    - --append: updates the existing csv with none/some/all rewards already evaluated, re-evaluating some/all rewards based on args passed
+  - generates a csv with rewards:  [output_rewards.csv](CSV/Output/Files/csv_rewards/output_rewards.csv)
+
+takes at most 8 optional args:
+- usage: ./run_evaluate_rewards.sh [input.csv] [output.csv] [REWARDS...]
+  - are input.csv and output.csv always in a set directory? or are they paths to a directory?
+  - can only [REWARDS...] be passed without input and output.csv?
+  - what happens if illegal rewards passed?
+  - where does append/create flag go? does that part even work?
+    - I think what happens now is that it checks if the output exists, and if it does then it appends instead of creating.
+    - this is not what i want, since if i recreate the formatted csv, then i will want to recreate the entire output csv, right?
+    - Yes, because what if i want to delete some of the effectors. Ok this needs to be changed.
+
+example:
+- ./run_evaluate_rewards.sh
+  - need to find out how the flags work here
+- python3 evaluate_rewards.py --input my_input.csv --output ../Files/csv_rewards/output_rewards.csv --append --rewards SIZE QED
+
+**[generate_rewards_plots.sh](R/Scripts/generate_rewards_plots.sh)**: calls [all_in_1_final.R](R/Scripts/all_in_1_final.R). 
+- purpose: creates the plots of all the rewards of the effectors in order of best binding to worst binding from left to right. 
+
+takes input from [output_rewards.csv](CSV/Output/Files/csv_rewards/output_rewards.csv)
+- generates a png output of [PRESENTATION_affinity_rewards.png](R/Files/PRESENTATION_affinity_rewards.png)
+- needed to set up R with a custom folder that has write perms that stores all the required libs. and needed to config Rprofile or something so that the custom lib folder is accessible.
+
+**[generate_csv_and_plot.sh](HQ/generate_csv_and_plot.sh)**: ARGS
+- end goal: should take flags of which stages to perform, should also accept variable amounts of args for each stage and parse them correctly. should also have ability to take no args and just do the most convenient default behavior.
+- current problem: don't know how the append works in the --evaluate-rewards stage.
+Usage: ./generate_csv_and_plot.sh [OPTIONS]
+
+Options:
+  --format-csv       Run the CSV formatting script.
+  --evaluate-rewards Run the reward evaluation script.
+  --generate-plot    Run the plot generation script.
+  -h, --help         Display this help message.
+
+If no options are provided, all tasks will be executed in the following order:
+1. Format CSV
+2. Evaluate Rewards
+3. Generate Plot
+- example usage:
+  - ./generate_csv_and_plot.sh
+  - ./generate_csv_and_plot.sh --help
+  - ./generate_csv_and_plot.sh --generate-plot

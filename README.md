@@ -174,3 +174,4 @@ Should be able to do everything by putting a CSV file into the INPUT folder, run
 
 ## Updates made for Thayer presentation
 I attempted to update the generation process, but I was up against the clock and at the last minute my generation process wasn't actually running the docking reward, was just giving -2 each time. So I went back to the old version and was able to calculate the rewards for the new effectors. This was like 2 weeks ago or more though, and I can barely remember.
+
