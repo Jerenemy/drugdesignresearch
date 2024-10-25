@@ -170,7 +170,7 @@ Still need to understand exactly  the order of the stages. What is called when i
 Idk yet, I'll find out tomorrow.
 
 ## How to Fix to make Reward Creation Much More Streamlined
-Should be able to do everything by putting a CSV file into the INPUT folder, running the command with the csv_name as the cmd-line arg, the specific task to perform (eg img creation, reward evaluation, R graph creation), and it should spit the CSV with rewards in the OUTPUT, along with the Images in the OUTPUT, and any graphs created in the OUTPUT. This shouldn't be too difficult. TOMORROW I AM GOING TO DO ALL OF THIS TO MAKE IT POSSIBLE TO ACTUALLY WORK WITHOUT WASTING MY TIME NAVINGATING ALL THIS SHIT CODE. 
+Should be able to do everything by putting a CSV file into the INPUT folder, running the command with the csv_name as the cmd-line arg, the specific task to perform (eg img creation, reward evaluation, R graph creation), and it should spit the CSV with rewards in the OUTPUT, along with the Images in the OUTPUT, and any graphs created in the OUTPUT. This shouldn't be too difficult. 
 
 ## Current Attempt at Streamlined Process
 Now, to generate the final graph of the rewards based on the molecules, you simply run the [generate_csv_and_plot.sh](HQ/generate_csv_and_plot.sh) in HQ, and pass the required arguments. 
