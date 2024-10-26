@@ -79,7 +79,7 @@ create_csv.sh then calls [convert_csv_to_list.py](CSV/convert_csv_to_list.py).
     - Expected range is [0,1].
   - **[normalize_value](../Rewards/rewards.py#L135)** scales *x* from orig range to [0,1]. 
     - Although this is the exact same method as scale_to_range, it is necessary to be called before passing into *transform*.
-  - **[combinedReward](../Rewards/rewards.py#L157)** calculates reward starting as linear up to *transition_point*, then smoothly transitions to gaussian centered around *ideal* val with fwhm *sigma*. ]
+  - **[combinedReward](../Rewards/rewards.py#L157)** calculates reward starting as linear up to *transition_point*, then smoothly transitions to gaussian centered around *ideal* val with fwhm *sigma*. 
     - The point of combinedReward is to give enough incentive to allow the model to build up to close to that point.
     - With pure gaussian reward the vals would be too small at first and never climb, as the differences would be insignificant.
 
@@ -172,7 +172,7 @@ Idk yet, I'll find out tomorrow.
 ## How to Fix to make Reward Creation Much More Streamlined
 Should be able to do everything by putting a CSV file into the INPUT folder, running the command with the csv_name as the cmd-line arg, the specific task to perform (eg img creation, reward evaluation, R graph creation), and it should spit the CSV with rewards in the OUTPUT, along with the Images in the OUTPUT, and any graphs created in the OUTPUT. This shouldn't be too difficult. 
 
-## Current Attempt at Streamlined Process
+## Single Bash script to generate effector rewards and graph
 Now, to generate the final graph of the rewards based on the molecules, you simply run the [generate_csv_and_plot.sh](HQ/generate_csv_and_plot.sh) in HQ, and pass the required arguments. 
 
 **[generate_csv_and_plot.sh](HQ/generate_csv_and_plot.sh)**: highest level bash script. has functionality to generate the formatted csv with the effectors, create a new csv with some/all rewards evaluated or update specific rewards in an existing csv with rewards evaluated, and create the plot of the rewards against the effectors in order of highest KD affinity to lowest.
