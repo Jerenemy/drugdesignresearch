@@ -191,8 +191,9 @@ takes at most 2 optional args:
 
 **[run_evaluate_rewards.sh](CSV/Output/Scripts/run_evaluate_rewards.sh)**: calls [evaluate_rewards.py](CSV/Output/Scripts/evaluate_rewards.py). 
 - purpose: evaluate the rewards for each effector in the formatted csv.
-  - 2 modes: --create, --append
-    - --create: creates a new csv starting from the blank template of the formatted csv, and evaluates some/all of rewards
+  - 2 modes: create (default), --append
+    - create: creates a new csv starting from the blank template of the formatted csv, and evaluates some/all of rewards
+    - NOTE: CREATE IS NOT ACTUALLY A FLAG, IT IS THE DEFAULT
     - --append: updates the existing csv with none/some/all rewards already evaluated, re-evaluating some/all rewards based on args passed
   - generates a csv with rewards:  [output_rewards.csv](CSV/Output/Files/csv_rewards/output_rewards.csv)
 
@@ -237,3 +238,10 @@ If no options are provided, all tasks will be executed in the following order:
   - ./generate_csv_and_plot.sh
   - ./generate_csv_and_plot.sh --help
   - ./generate_csv_and_plot.sh --generate-plot
+
+## Problem with run_evaluate_rewards.sh
+I want the run_evaluate_rewards to call the script in append mode if it already exists, but i also am concerned if i want to re-create the file with a different set of effectors, then im not sure how it handles that in append mode. and if i switch to want to use another csv file, now all the default names are going to be wrong. what would be nice would be that the default names all come from the first input name, and then 
+
+Currently, evaluate_rewards.py run in append mode does not remove effectors from the list. create mode is useful for this scenario. 
+
+Currently, run_evaluate_rewards.sh sets it to append mode whenever the output file already exists. Let's think about if this is a valid approach. Whenever I want to use a new input file, I would likely call that something different. So the correct approach would be to keep it this way but change the name that the evaluate_rewards saves the csv to be the name but with a _rewards str added on to it.

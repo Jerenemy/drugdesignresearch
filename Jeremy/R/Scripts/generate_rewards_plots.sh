@@ -4,24 +4,26 @@
 # rewards calculated, located in ../../CSV/Output/Files/csv_rewards/output_rewards.csv
 
 # call the all_in_1_final.R script:
-
-DEFAULT_CSV="../../CSV/Output/Files/csv_rewards/output_rewards.csv"
+DEFAULT_DIR="../../CSV/Output/Files/csv_rewards/"
+DEFAULT_CSV_NAME="sorted_deduped_effectors"
 
 # check if an input CSV file provided as arg
 if [ "$#" -ge 1 ]; then
-    INPUT_CSV="$1"
+    CSV__NAME="$1"
 else 
-    INPUT_CSV="$DEFAULT_CSV"
+    CSV_NAME="$DEFAULT_CSV_NAME"
 fi
 
+CSV_FILE_PATH="${DEFAULT_DIR}${CSV_NAME}_rewards.csv"
+
 # check if the csv file exists
-if [ ! -f "$INPUT_CSV" ]; then
-    echo "Error: csv file '$INPUT_CSV' not found!"
+if [ ! -f "$CSV_FILE_PATH" ]; then
+    echo "Error: csv file '$CSV_FILE_PATH' not found!"
     exit 1
 fi 
 
 # call the R script with the provided or default input CSV file
-Rscript all_in_1_final.R "$INPUT_CSV"
+Rscript all_in_1_final.R "$CSV_FILE_PATH"
 
 # check if R script executed successfully
 if [ $? -eq 0 ]; then   

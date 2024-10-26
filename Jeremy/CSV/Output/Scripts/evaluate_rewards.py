@@ -141,26 +141,39 @@ def append_to_csv(effectors_list, reward_module, output_file, start_line):
     # Prepare new/updated data
     for i, (key, data) in enumerate(effectors_list):
         smiles, binding_affinity, chembl_number = data
-        row = [
-            smiles,
-            key,
-            chembl_number,
-            binding_affinity
-        ]
-        # Append rewards
+        # Retrieve existing row if it exists
+        if key in existing_dict:
+            row = existing_dict[key]  # UPDATE: Preserve existing data
+        else:
+            row = [  # UPDATE: Create new row if it doesn't exist
+                smiles,
+                key,
+                chembl_number,
+                binding_affinity
+            ]
+        # Update or add rewards
         for reward in reward_names:
             try:
                 reward_value = reward_data[reward][i]
-                row.append(reward_value)
+                if reward in header:
+                    # UPDATE: Update the existing reward value in the row
+                    reward_index = header.index(reward)
+                    row[reward_index] = reward_value
+                else:
+                    # UPDATE: Add new reward if it doesn't exist in the row
+                    row.append(reward_value)
+                    header.append(reward)
             except IndexError:
                 print(f"Error: Reward index out of range for {reward} on {key}")
-                row.append('')
+                if reward in header:
+                    reward_index = header.index(reward)
+                    row[reward_index] = ''
+                else:
+                    row.append('')
+                    header.append(reward)
 
-        # UPDATE: Replace row if it exists, otherwise add new
-        if key in existing_dict:
-            existing_dict[key] = row  # Update existing entry
-        else:
-            existing_dict[key] = row  # Add new entry
+        # Update dictionary with modified or new row
+        existing_dict[key] = row  # UPDATE: Update dictionary with modified or new row
 
     # Write updated data back to the CSV
     try:
@@ -190,26 +203,26 @@ def parse_effectors_dict(effectors_dict):
 def main():
     # Argument parsing
     parser = argparse.ArgumentParser(description="Calculate molecular rewards and generate a CSV file.")
-    parser.add_argument('--input', type=str, default=None, help='Path to the input CSV file containing molecular data.')
-    parser.add_argument('--output', type=str, default=None, help='Path to the output CSV file to write rewards.')
+    parser.add_argument('--file_name', type=str, default="sorted_deduped_effectors", help='Path to the input CSV file containing molecular data.')
     parser.add_argument('--append', action='store_true', help='Flag to append data instead of creating a new CSV.')
     parser.add_argument('--start_line', type=int, default=1, help='Line number to start appending data (0-based index).')
-    parser.add_argument('--rewards', type=str, nargs='+', default=None, help='List of rewards to calculate (e.g., SIZE SYNTH QED). If not specified, all rewards are calculated.')
+    parser.add_argument('--rewards', type=str, nargs='+', default=['SIZE', 'SYNTH', 'LIPINSKI', 'QED', 'LogP', 'DOCK'], help='List of rewards to calculate (e.g., SIZE SYNTH QED). If not specified, all rewards are calculated.')
     args = parser.parse_args()
 
     append_flag = args.append
 
+    # default_csv_name = "sorted_deduped_effectors"
     # Set default directories based on mode
     if append_flag:
-        default_input = "../Files/csv_rewards/output_rewards.csv"
-        default_output = "../Files/csv_rewards/output_rewards.csv"
+        default_csv_input_dir = "../Files/csv_rewards/"
+        input_file = default_csv_input_dir + args.file_name + "_rewards.csv"
+        output_file = default_csv_input_dir + args.file_name + "_rewards.csv"
     else:
-        default_input = "../../Input/Files/Formatted/sorted_deduped_effectors_formatted.csv"
-        default_output = "../Files/csv_rewards/output_rewards.csv"
+        default_csv_input_dir = "../../Input/Files/Formatted/"
+        default_csv_output_dir = "../Files/csv_rewards/"
+        input_file = default_csv_input_dir + args.file_name + "_formatted.csv"
+        output_file = default_csv_output_dir + args.file_name + "_rewards.csv"
 
-    # Assign input and output files
-    input_file = args.input if args.input else default_input
-    output_file = args.output if args.output else default_output
 
     # Check if input file exists
     if not os.path.exists(input_file):
@@ -233,16 +246,11 @@ def main():
                     print(f"Warning: Missing Nickname or Smiles in row: {row}")
     except Exception as e:
         print(f"Error reading input CSV file {input_file}: {e}")
-        sys.exit(1)
 
     effectors_list = parse_effectors_dict(effectors_dict)
 
     # Generate reward modules
-    if args.rewards:
-        reward_types = args.rewards
-    else:
-        reward_types = ['SIZE', 'SYNTH', 'LIPINSKI', 'QED', 'LogP', 'DOCK']
-    
+    reward_types = args.rewards
     print(f"Selected Rewards: {', '.join(reward_types)}")
 
     reward_list = generateRewardModule(reward_types, Wandb=False)
@@ -260,3 +268,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+ # UPDATE: Start of modification for handling existing rewards
+ # UPDATE: Retrieve existing row if it exists and update selectively
+ # UPDATE: Ensure that only specified rewards are updated and others are preserved
